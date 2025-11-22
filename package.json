@@ -9,14 +9,18 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
+    "start:prod": "next start -p $PORT",
+    "render:start": "node scripts/render-start.js",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:generate": "prisma generate",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "seed": "ts-node --transpile-only prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
+    "prisma": "^5.0.0",
     "@socket.io/redis-adapter": "^7.2.0",
     "axios": "^1.5.0",
     "bcryptjs": "^2.4.3",
@@ -31,7 +35,6 @@
     "simple-peer": "^9.11.1"
   },
   "devDependencies": {
-    "prisma": "^5.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.0"
   }
