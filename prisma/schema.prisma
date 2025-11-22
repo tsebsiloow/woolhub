@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+model User {
+  id                 String          @id @default(cuid())
+  username           String          @unique
+  email              String?         @unique
+  password           String
+  name               String?
+  role               Role            @default(USER)
+  banned             Boolean         @default(false)
+  bannedFromComments Boolean         @default(false)
+  theme              String?
+  comments           Comment[]
+  meetings           Meeting[]       @relation("CreatorMeetings")
+  createdAt          DateTime        @default(now())
+  accesses           MeetingAccess[]
+  uploads            File[]
+  ips                UserIp[]
+}
+
+model Meeting {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime
+  createdBy   User      @relation("CreatorMeetings", fields: [createdById], references: [id])
+  createdById String
+  comments    Comment[]
+  files       File[]
+  accesses    MeetingAccess[]
+  createdAt   DateTime  @default(now())
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   String
+  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  meetingId  String
+  createdAt  DateTime @default(now())
+}
+
+model File {
+  id         String   @id @default(cuid())
+  filename   String
+  url        String
+  mime       String?
+  size       Int?
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+  uploaderId String
+  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  meetingId  String
+  createdAt  DateTime @default(now())
+}
+
+model MeetingAccess {
+  id         String   @id @default(cuid())
+  meeting    Meeting  @relation(fields: [meetingId], references: [id])
+  meetingId String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  visitedAt  DateTime @default(now())
+
+  @@unique([meetingId, userId])
+  @@index([meetingId])
+}
+
+model UserIp {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  ip        String
+  seenAt    DateTime @default(now())
+
+  @@unique([userId, ip])
+  @@index([ip])
+}
+
+model IpBan {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model BannedWord {
+  id        String   @id @default(cuid())
+  word      String   @unique
+  createdAt DateTime @default(now())
+}
